@@ -75,35 +75,94 @@ def secretaire():
         date_reg_com = request.form['date_reg_com']
         code_agence = request.form['code_agence']
 
-        daterecp = request.form['date_reception']  # Assuming this is from the session date
-        dateenvoi = datetime.now().strftime('%Y-%m-%d')  # Fetch from form if available
-        etat = None  # Fetch from form if available
+        # Assuming this is from the session date
+        daterecp = request.form['date_reception']  
+        # Fetch from form if available
+        dateenvoi = datetime.now().strftime('%Y-%m-%d')  
+        # Fetch from form if available
+        etat = None  
+        # Fetch from form if available
         descriptif = None
         folio = session.get('folio')  # Retrieve folio from session
 
-        # Insert into MySQL
-        cur = mysql.connection.cursor()
-        cur.execute("""
-            INSERT INTO dossier (ID_CLIENT, NUM_COMPTE, NOM, PRENOM, RAISON_SOCIALE, ACTIVITE, ADRESSE, NUMEROTEL, DATE_OUVERTURE, DATE_CLOTURE, CAUSE, NUM_REG_COM, DATE_REG_COM, CODE_AGENCE)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                    (id_client, num_compte, nom, prenom, raison_sociale, activite, adresse, numerotel, date_ouverture, date_cloture, cause, num_reg_com, date_reg_com, code_agence))
-        mysql.connection.commit()
+        try:
+            # Insert into MySQL
+            cur = mysql.connection.cursor()
 
-        cur.execute("""
-            INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, ID_CLIENT, FOLIO)
-            VALUES (%s, %s, %s, %s, %s, %s)""",
-                    (daterecp, dateenvoi, etat, descriptif, id_client, folio))
-        mysql.connection.commit()
-        cur.close()
+            # Insert into dossier table
+            cur.execute("""
+                INSERT INTO dossier (ID_CLIENT, NUM_COMPTE, NOM, PRENOM, RAISON_SOCIALE, ACTIVITE, ADRESSE, NUMEROTEL, DATE_OUVERTURE, DATE_CLOTURE, CAUSE, NUM_REG_COM, DATE_REG_COM, CODE_AGENCE)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (id_client, num_compte, nom, prenom, raison_sociale, activite, adresse, numerotel, date_ouverture, date_cloture, cause, num_reg_com, date_reg_com, code_agence))
+            mysql.connection.commit()
 
-        return 'Successfully submitted dossier form!'
-    
+            # Insert into datetransmis table
+            cur.execute("""
+                INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, ID_CLIENT, FOLIO)
+                VALUES (%s, %s, %s, %s, %s, %s)""",
+                        (daterecp, dateenvoi, etat, descriptif, id_client, folio))
+            mysql.connection.commit()
+
+            cur.close()
+            return 'Successfully submitted dossier form!'
+        
+        except Exception as e:
+            # Handle exceptions (e.g., database errors)
+            print(f"Error submitting dossier form: {str(e)}")
+            return 'An error occurred while processing the form. Please try again later.', 500
+
+    # Handle GET request (render form)
     return render_template('secretaire.html')
 
-# Routes for different roles
-@app.route('/etude')
+@app.route('/etude', methods=['GET', 'POST'])
 def etude():
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+
+        # Fetch id_client and other form data
+        id_client = request.form.get('id_client')
+        datereception=request.form.get('datereception')
+        conformity=request.form.get('conformity')
+        folio = session.get('folio')
+        dateenvoi = datetime.now().strftime('%Y-%m-%d') 
+        
+        # Collect elements marked as 'nexistepas'
+        elements = []
+        for i in range(0, 33):  # Adjust the range based on your form's element count
+            key_element = f'element{i}'
+            if request.form.get(key_element) == 'nexistepas':
+                elements.append((id_client, i))  # Include id_client and element number
+        
+        if request.form.get('other') == 'autre':
+            autre_texte = request.form.get('autreTexte')
+            elements.append((id_client, autre_texte))
+           
+
+        try:
+            # Insert into docs table
+            sql = "INSERT INTO docs (id_client, element) VALUES (%s, %s)"
+            for element in elements:
+                cur.execute(sql, element)  # Execute query with each element tuple
+                mysql.connection.commit()
+
+            cur.execute("""
+                INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, ID_CLIENT, FOLIO)
+                VALUES (%s, %s, %s, %s, %s, %s)""",
+                        (datereception, dateenvoi, conformity, autre_texte, id_client, folio))
+            mysql.connection.commit()
+
+
+            cur.close()
+            return render_template('etude.html')
+        
+        except Exception as e:
+            # Handle exceptions (e.g., database errors)
+            print(f"Error submitting etude form: {str(e)}")
+            return 'An error occurred while processing the form. Please try again later.', 500
+
+    # Handle GET request (render form)
     return render_template('etude.html')
+
 
 @app.route('/validation')
 def validation():
