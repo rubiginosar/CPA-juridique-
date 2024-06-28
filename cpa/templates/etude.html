@@ -460,19 +460,7 @@
                 document.getElementById('listePhysique').classList.remove('hidden');
             }
         }
-        function highlightRow(radio) {
-            const row = radio.closest('tr');
-            const radioes = row.querySelectorAll('input[type="radio"]');
-            if (radio.value === "nexistepas" && radio.checked) {
-                row.classList.add('highlight');
-                radioes[0].checked = false; // Décocher "Existe"
-            } else if (radio.value === "existe" && radio.checked) {
-                row.classList.remove('highlight');
-                radioes[1].checked = false; // Décocher "N'existe pas"
-            } else if (!radio.checked) {
-                row.classList.remove('highlight');
-            }
-        }
+      
     
 
         function showNonConforme() {
