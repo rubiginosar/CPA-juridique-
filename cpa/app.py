@@ -120,11 +120,14 @@ def etude():
         cur = mysql.connection.cursor()
 
         # Fetch id_client and other form data
-        id_client = request.form.get('id_client')
+        id_cl = request.form.get('id_client')
         datereception=request.form.get('datereception')
         conformity=request.form.get('conformity')
         folio = session.get('folio')
         dateenvoi = datetime.now().strftime('%Y-%m-%d') 
+
+        cur.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (id_cl,))
+        id_client = cur.fetchone()[0]
         
         # Collect elements marked as 'nexistepas'
         elements = []
@@ -132,6 +135,8 @@ def etude():
             key_element = f'element{i}'
             if request.form.get(key_element) == 'nexistepas':
                 elements.append((id_client, i))  # Include id_client and element number
+        
+        autre_texte = None
         
         if request.form.get('other') == 'autre':
             autre_texte = request.form.get('autreTexte')
