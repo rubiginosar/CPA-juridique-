@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>envoiversag</title>
+<link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+<style>
+      
+    /* Reset CSS */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f9; /* Light grey background */
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .header {
+        width: 100%;
+        background-color: #ffffff; /* White background */
+        padding: 10px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+    }
+    
+    .header img {
+        height: 50px; /* Adjust height as needed */
+        margin-left: 20px; /* Add margin to the left of the logo */
+    }
+    
+    .header a {
+        color: #0056b3; /* Blue text color */
+        text-decoration: none;
+        margin-right: 20px; /* Add margin to the right of the links */
+        padding: 10px;
+        font-weight: bold;
+        transition: color 0.3s;
+    }
+    
+    .header a:hover {
+        color: #003d80; /* Darker blue on hover */
+    }
+</style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='cpa.png') }}" alt="logo">
+        <a href="{{ url_for('secretaire') }}">
+            <i class='bx bx-calendar icon'></i>Réception</a>
+    </div>
+</body>
+</html>
