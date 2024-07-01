@@ -1,5 +1,6 @@
+create database db_cpa
+use db_cpa
 /*création des tables*/
-
 CREATE TABLE agence (
     code INT(5) PRIMARY KEY,
     intitule VARCHAR(70)
@@ -8,13 +9,33 @@ create table utilisateur (folio int(5) PRIMARY KEY ,
 MDP int(5) , nom varchar(50) , prenom varchar(50) , qualite varchar(50));
 ALTER TABLE utilisateur MODIFY MDP VARCHAR(50) NOT NULL;
 
-create table dossier(id_client varchar(20) primary key , raison_sociale varchar(100) , nom varchar(50) , 
-prenom varchar(50), num_compte varchar(20) , agence varchar(70), ACTIVITE  varchar(100) 
-date_ouverture date ,DATE_CLOTURE date , adresse varchar(250) , NUMEROTEL   varchar(20)  , 
-CAUSE  varchar(200) , NUM_REG_COM  varchar(50), DATE_REG_COM date  , CODE_AGENCE  int(5) REFERENCES(agence));
+CREATE TABLE agence (
+    CODE_AGENCE INT PRIMARY KEY,
+    AGENCE_NAME VARCHAR(70) -- Assuming you have a name or some attribute for the 'agence'
+);
+
+CREATE TABLE dossier (
+    id_client VARCHAR(20) PRIMARY KEY,
+    raison_sociale VARCHAR(100),
+    nom VARCHAR(50),
+    prenom VARCHAR(50),
+    num_compte VARCHAR(20),
+    agence VARCHAR(70),
+    ACTIVITE VARCHAR(100),
+    date_ouverture DATE,
+    DATE_CLOTURE DATE,
+    adresse VARCHAR(250),
+    NUMEROTEL VARCHAR(20),
+    CAUSE VARCHAR(200),
+    NUM_REG_COM VARCHAR(50),
+    DATE_REG_COM DATE,
+    CODE_AGENCE INT(5),
+    FOREIGN KEY (CODE_AGENCE) REFERENCES agence(code)
+);
+
 
 CREATE TABLE datetransmis (
-    id INT(11) AUTO_INCREMENT,
+    id INT(11) NOT NULL,
     daterecp DATE,
     dateenvoi DATE,
     etat VARCHAR(50),
@@ -25,6 +46,26 @@ CREATE TABLE datetransmis (
     CONSTRAINT fk_folio FOREIGN KEY (folio) REFERENCES utilisateur(folio),
     CONSTRAINT fk_id_client FOREIGN KEY (id_client) REFERENCES dossier(id_client)
 );
+
+DELIMITER //
+
+CREATE TRIGGER before_insert_datetransmis
+BEFORE INSERT ON datetransmis
+FOR EACH ROW
+BEGIN
+    DECLARE max_id INT;
+
+    -- Find the maximum id value for the given id_client and folio
+    SELECT COALESCE(MAX(id), 0) INTO max_id
+    FROM datetransmis
+    WHERE id_client = NEW.id_client AND folio = NEW.folio;
+
+    -- Increment the id value
+    SET NEW.id = max_id + 1;
+END //
+
+DELIMITER ;
+
 
 
 CREATE TABLE docs (
@@ -51,8 +92,8 @@ INSERT INTO agence (CODE, INTITULE) VALUES ( 502, 'Guichet T4 aeroport d"Alger '
 
 
 INSERT INTO utilisateur (FOLIO, MDP, NOM, PRENOM, QUALITE) VALUES
-         ('F1', 'mdp1', 'Secrétaire', '', 'Secrétaire'),
-         ('F2', 'mdp2', 'Charge Étude', '', 'Charge étude'),
-         ('F3', 'mdp3', 'Charge Validation', '', 'Charge de validation'),
-         ('F4', 'mdp4', 'Directeur', '', 'Directeur');
+         ('11111', '11111', 'Secrétaire', '', 'Secrétaire'),
+         ('22222', '22222', 'Charge Étude', '', 'Charge étude'),
+         ('33333', '33333', 'Charge Validation', '', 'Charge de validation'),
+         ('44444', '44444', 'Directeur', '', 'Directeur');
 

@@ -10,7 +10,7 @@ app.secret_key = 'your_secret_key'
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'pass_root'
-app.config['MYSQL_DB'] = 'cpa'
+app.config['MYSQL_DB'] = 'db_cpa'
 app.config['MYSQL_PORT'] = 3307
 
 mysql = MySQL(app)
@@ -160,15 +160,21 @@ def etude():
         cur = mysql.connection.cursor()
 
         # Fetch id_client and other form data
-        id_cl = request.form.get('id_client')
-        datereception=request.form.get('datereception')
-        conformity=request.form.get('conformity')
+        num_compte = request.form.get('id_client')
+        datereception = request.form.get('datereception')
+        conformity = request.form.get('conformity')
         folio = session.get('folio')
         dateenvoi = datetime.now().strftime('%Y-%m-%d') 
 
-        cur.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (id_cl,))
-        id_client = cur.fetchone()[0]
-        
+        cur.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (num_compte,))
+        result = cur.fetchone()
+        if result:
+            id_client = result[0]
+        else:
+            # Handle the case where no matching id_client is found
+            print(f"No id_client found for num_compte: {num_compte}")
+            return 'No matching client found.', 400
+
         # Collect elements marked as 'nexistepas'
         elements = []
         for i in range(0, 33):  # Adjust the range based on your form's element count
@@ -181,8 +187,7 @@ def etude():
         if request.form.get('other') == 'autre':
             autre_texte = request.form.get('autreTexte')
             elements.append((id_client, autre_texte))
-           
-
+        
         try:
             # Insert into docs table
             sql = "INSERT INTO docs (id_client, element) VALUES (%s, %s)"
@@ -195,7 +200,6 @@ def etude():
                 VALUES (%s, %s, %s, %s, %s, %s)""",
                         (datereception, dateenvoi, conformity, autre_texte, id_client, folio))
             mysql.connection.commit()
-
 
             cur.close()
             return render_template('etude.html')
