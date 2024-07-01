@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <title>Validation</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        #container {
+            width: 80%;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #logo-container {
+            flex-grow: 1;
+        }
+        #logout-container {
+            flex-shrink: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: #4da3ff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #3688e3;
+        }
+        img {
+            width: 250px;
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: #0056b3;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #003d80;
+        }
+        .icon {
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        .nav-text {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <div id="logo-container">
+                <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
+            </div>
+            <div id="logout-container">
+                <a href="{{ url_for('index') }}">
+                    <i class='bx bx-log-out icon'></i>
+                    <span class="text nav-text">Logout</span>
+                </a>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Client</th>
+                    <th>État</th>
+                    <th>Descriptif</th>
+                    <th>Folio</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="data-table-body">
+                <!-- Data will be inserted here via JavaScript -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/get_data')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('data-table-body');
+                    tableBody.innerHTML = '';
+                    data.forEach(entry => {
+                        const row = document.createElement('tr');
+                        
+                        const idClientCell = document.createElement('td');
+                        idClientCell.textContent = entry.idclient;
+                        row.appendChild(idClientCell);
+                        
+                        const etatCell = document.createElement('td');
+                        etatCell.textContent = entry.etat;
+                        row.appendChild(etatCell);
+                        
+                        const descriptifCell = document.createElement('td');
+                        descriptifCell.textContent = entry.descriptif;
+                        row.appendChild(descriptifCell);
+                        
+                        const folioCell = document.createElement('td');
+                        folioCell.textContent = entry.folio;
+                        row.appendChild(folioCell);
+                        
+                        const actionCell = document.createElement('td');
+                        const form = document.createElement('form');
+                        form.action = '/validate';
+                        form.method = 'post';
+                        
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'idclient';
+                        input.value = entry.idclient;
+                        form.appendChild(input);
+                        
+                        const button = document.createElement('button');
+                        button.type = 'submit';
+                        button.textContent = 'Validate';
+                        form.appendChild(button);
+                        
+                        actionCell.appendChild(form);
+                        row.appendChild(actionCell);
+                        
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        });
+    </script>
+</body>
+</html>
+
+
