@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     <title>chargé d'étude</title>
     <style>
     body {
@@ -161,10 +162,60 @@
       #bouttons{
         margin-top : 5px
       }
+      #header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    #logo-container {
+        flex-grow: 1;
+    }
+    
+    #logout-container {
+        flex-shrink: 0;
+    }
+    
+    img {
+        width: 250px;
+    }
+    a {
+        display: inline-block;
+        text-decoration: none;
+        color: #0056b3; /* Couleur bleue pour le lien */
+        font-weight: bold;
+        font-size: 16px;
+        transition: color 0.3s;
+    }
+    
+    a:hover {
+        color: #003d80; /* Couleur bleue plus sombre au survol */
+    }
+    
+    .icon {
+        font-size: 24px;
+        vertical-align: middle;
+    }
+    
+    .nav-text {
+        vertical-align: middle;
+    }
     </style>
 </head>
 <body>
     <div id="container">
+        <div id="header">
+            <div id="logo-container">
+                <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
+            </div>
+            <div id="logout-container">
+                <a href="{{ url_for('index') }}">
+                    <i class='bx bx-log-out icon'></i>
+                    <span class="text nav-text">Logout</span>
+                </a>
+            </div>
+        </div>
         <form id="form" action="/etude" method="POST">
         <div id="barre">
             <div>ID Client</div>
@@ -172,7 +223,6 @@
             <div>Date Réception</div>
             <input type="date" id="datereception" name="datereception">
         </div>
-        
         <div id="listefeu">
             <label for="personneType">Type de clinet:</label>
             <select id="personneType" name="personne" onchange="showListe(this.value)">
@@ -180,307 +230,303 @@
                 <option value="morale">Association</option>
                 <option value="physique">Individu</option>
             </select>
-            <div id="listeMorale" class="hidden">
-                <table class="table-container">
-                    <thead>
+                <div id="listeMorale" class="hidden">
+                    <table class="table-container">
+                        <thead>
+                            <tr>
+                                <th>Élément</th>
+                                <th>Existe</th>
+                                <th>N'existe pas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                         <tr>
-                            <th>Élément</th>
-                            <th>Existe</th>
-                            <th>N'existe pas</th>
+                            <td class="description0">
+                                • Un justificatif d'activité pour les professions libérales (Copie d'Agrément et Copie d'Inscription au tableau d'ordre).
+                            </td>
+                            <td><input type="radio" name="element0" value="existe"></td>
+                            <td><input type="radio" name="element0" value="nexistepas"></td>
                         </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <td class="description0">
-                            • Un justificatif d'activité pour les professions libérales (Copie d'Agrément et Copie d'Inscription au tableau d'ordre).
-                        </td>
-                        <td><input type="radio" name="element0" value="existe"></td>
-                        <td><input type="radio" name="element0" value="nexistepas"></td>
-                    </tr>
-                        <tr>
-                            <td class="description1">• Copie de la pièce d'identité biométrique du Gérant/passeport pour les étrangers.</td>
-                            <td><input type="radio" name="element1" value="existe"></td>
-                            <td><input type="radio" name="element1" value="nexistepas"></td>
-                        </tr>
-        <tr>
-            <td class="description2">
-                • Copie de la piéce d'identité biométrique du Gérant/passeport pour les étrangers et la carte de séjour en cour validité.
-            </td>
-            <td><input type="radio" name="element2" value="existe"></td>
-                            <td><input type="radio" name="element2" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description3">
-                • Statut initial et ses modificatifs.
-            </td>
-            <td><input type="radio" name="element3" value="existe"></td>
-             <td><input type="radio" name="element3" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description4">
-               • Copie du Registre de commerce et/ou copie de l'agrément présenté, le cas échéant.
-            </td>
-            <td><input type="radio" name="element4" value="existe"></td>
-                            <td><input type="radio" name="element4" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description5">
-               • Carte d'artisanat pour un artisan.
-            </td>
-            <td><input type="radio" name="element5" value="existe"></td>
-                            <td><input type="radio" name="element5" value="nexistepas"></td>
-        </tr>
-        <tr>
-
-        <tr>
-            <td class="description6">
-               • Lettre d'engagement remplir par la relation et spécimen de signature.
-            </td>
-            <td><input type="radio" name="element6" value="existe"></td>
-                            <td><input type="radio" name="element6" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description7">
-                • SYRON KYC pour (société, gérants  associées) et sa fiche approprie remplir par la relation (questionnaire).
-            </td>
-            <td><input type="radio" name="element7" value="existe"></td>
-                            <td><input type="radio" name="element7" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description8">
-                •FATCA.
-            </td>
-            <td><input type="radio" name="element8" value="existe"></td>
-                            <td><input type="radio" name="element8" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description9">
-               • Consultation Fichier clientèle et Interdit chéquier.
-            </td>
-            <td><input type="radio" name="element9" value="existe"></td>
-                            <td><input type="radio" name="element9" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description10">
-              • Copie du Numéro d'Identification Fiscale (NIF) et Numéro d'Identification Statistiques (NIS) présentés.
-            </td>
-            <td><input type="radio" name="element10" value="existe"></td>
-                            <td><input type="radio" name="element10" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description11">
-                *• Décision de désignation des personnes habilitées à faire fonctionner le compte (Bac 14)/Procuration notariée pour tiers / BAC 14.
-            </td>
-            <td><input type="radio" name="element11" value="existe"></td>
-                            <td><input type="radio" name="element11" value="nexistepas"></td>
-        </tr>
-        <tr>
-            <td class="description12">
-                • Consultation Hors périmètre.</td>
-                <td><input type="radio" name="element12" value="existe"></td>
-                            <td><input type="radio" name="element12" value="nexistepas"></td>
-            </tr>
+                            <tr>
+                                <td class="description1">• Copie de la pièce d'identité biométrique du Gérant/passeport pour les étrangers.</td>
+                                <td><input type="radio" name="element1" value="existe"></td>
+                                <td><input type="radio" name="element1" value="nexistepas"></td>
+                            </tr>
             <tr>
-                <td class="description13">
-               • Résidence. </td>
-               <td><input type="radio" name="element13" value="existe"></td>
-                            <td><input type="radio" name="element13" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td class="description14">
-               • Avis de la DOPEX ou préalable pour Import/Export et Personnes Etranger.</td>
-               <td><input type="radio" name="element14" value="existe"></td>
-                            <td><input type="radio" name="element14" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                <p class="description15">Pour l'Association :</p>
-               • Copie de la pièce d'identité biométrique du Président et trésorier.</td>
-               <td><input type="radio" name="element15" value="existe"></td>
-                            <td><input type="radio" name="element15" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td class="description16">
-                • Copie de l'agrément de l'association délivré par l'autorité compétente et publier dans un journal quotidien.</td>
-                <td><input type="radio" name="element16" value="existe"></td>
-                            <td><input type="radio" name="element16" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td class="description17">
-                • Statuts de l'association et liste des personnes chargées de son administration et ses modificatifs.</td>
-                <td><input type="radio" name="element17" value="existe"></td>
-                            <td><input type="radio" name="element17" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                    <div id="bouttons">
-                        <input type="checkbox" id="autre" name="other" value="autre" onclick="showAutre()">
-                        <label for="autre">autre</label>
-                        <textarea id="autreTexte" name="autreTexte" class="hidden" placeholder="Écrivez ici..."></textarea><br>
-                    </div>
+                <td class="description2">
+                    • Copie de la piéce d'identité biométrique du Gérant/passeport pour les étrangers et la carte de séjour en cour validité.
                 </td>
+                <td><input type="radio" name="element2" value="existe"></td>
+                                <td><input type="radio" name="element2" value="nexistepas"></td>
             </tr>
-            
-        </tbody>
-        </table>
-            </div>
-            <div id="listePhysique" class="hidden">
-                <table class="table-container">
-                    <thead>
-                        <tr>
-                            <th>Élément</th>
-                            <th>Existe</th>
-                            <th>N'existe pas</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <tr>
+                <td class="description3">
+                    • Statut initial et ses modificatifs.
+                </td>
+                <td><input type="radio" name="element3" value="existe"></td>
+                 <td><input type="radio" name="element3" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description4">
+                   • Copie du Registre de commerce et/ou copie de l'agrément présenté, le cas échéant.
+                </td>
+                <td><input type="radio" name="element4" value="existe"></td>
+                                <td><input type="radio" name="element4" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description5">
+                   • Carte d'artisanat pour un artisan.
+                </td>
+                <td><input type="radio" name="element5" value="existe"></td>
+                                <td><input type="radio" name="element5" value="nexistepas"></td>
+            </tr>
+            <tr>
+    
+            <tr>
+                <td class="description6">
+                   • Lettre d'engagement remplir par la relation et spécimen de signature.
+                </td>
+                <td><input type="radio" name="element6" value="existe"></td>
+                                <td><input type="radio" name="element6" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description7">
+                    • SYRON KYC pour (société, gérants  associées) et sa fiche approprie remplir par la relation (questionnaire).
+                </td>
+                <td><input type="radio" name="element7" value="existe"></td>
+                                <td><input type="radio" name="element7" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description8">
+                    •FATCA.
+                </td>
+                <td><input type="radio" name="element8" value="existe"></td>
+                                <td><input type="radio" name="element8" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description9">
+                   • Consultation Fichier clientèle et Interdit chéquier.
+                </td>
+                <td><input type="radio" name="element9" value="existe"></td>
+                                <td><input type="radio" name="element9" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description10">
+                  • Copie du Numéro d'Identification Fiscale (NIF) et Numéro d'Identification Statistiques (NIS) présentés.
+                </td>
+                <td><input type="radio" name="element10" value="existe"></td>
+                                <td><input type="radio" name="element10" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description11">
+                    *• Décision de désignation des personnes habilitées à faire fonctionner le compte (Bac 14)/Procuration notariée pour tiers / BAC 14.
+                </td>
+                <td><input type="radio" name="element11" value="existe"></td>
+                                <td><input type="radio" name="element11" value="nexistepas"></td>
+            </tr>
+            <tr>
+                <td class="description12">
+                    • Consultation Hors périmètre.</td>
+                    <td><input type="radio" name="element12" value="existe"></td>
+                                <td><input type="radio" name="element12" value="nexistepas"></td>
+                </tr>
                 <tr>
-                    <td>
-                        • Copie de la piéce d'identité biométrique du Gérant/passeport pour les étrangers.
-                    </td>
-                    <td><input type="radio" name="element18" value="existe"></td>
-                            <td><input type="radio" name="element18" value="nexistepas"></td>
+                    <td class="description13">
+                   • Résidence. </td>
+                   <td><input type="radio" name="element13" value="existe"></td>
+                                <td><input type="radio" name="element13" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td class="description14">
+                   • Avis de la DOPEX ou préalable pour Import/Export et Personnes Etranger.</td>
+                   <td><input type="radio" name="element14" value="existe"></td>
+                                <td><input type="radio" name="element14" value="nexistepas"></td>
                 </tr>
                 <tr>
                     <td>
-                • Demande d'ouverture compte connaissance du client et la convention de compte.</td>
-                <td><input type="radio" name="element19" value="existe"></td>
-                            <td><input type="radio" name="element19" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Copie du Registre de commerce et/ou copie de l'agrément présenté, le cas échéant.</td>
-                <td><input type="radio" name="element20" value="existe"></td>
-                            <td><input type="radio" name="element20" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Carte d'artisanat pour un artisan.</td>
-                <td><input type="radio" name="element21" value="existe"></td>
-                            <td><input type="radio" name="element21" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-              • Un justificatif d'activité pour les professions libérales (Copie d'Agrément et Copie d'Inscription au tableau d'ordre ).</td>
-              <td><input type="radio" name="element22" value="existe"></td>
-                            <td><input type="radio" name="element22" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Lettre d'engagement remplir par la relation et spécimen de signature (CA109).</td>
-                <td><input type="radio" name="element23" value="existe"></td>
-                            <td><input type="radio" name="element23" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • SYRON KYC pour (société, gérants  associées) et sa fiche approprie remplir par la relation (questionnaire).</td>
-                <td><input type="radio" name="element24" value="existe"></td>
-                            <td><input type="radio" name="element24" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-               •FATCA.</td>
-               <td><input type="radio" name="element25" value="existe"></td>
-                            <td><input type="radio" name="element25" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-             • Consultation Fichier clientèle et Interdit chéquier.</td>
-             <td><input type="radio" name="element26" value="existe"></td>
-                            <td><input type="radio" name="element26" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Décision de désignation des personnes habilitées à faire fonctionner le compte (Bac 14)/Procuration notariée pour tiers / BAC 14.</td>
-                <td><input type="radio" name="element27" value="existe"></td>
-                            <td><input type="radio" name="element27" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-            • Copie du Numéro d'Identification Fiscale (NIF) et Numéro d'Identification Statistiques (NIS) présentés.</td>
-            <td><input type="radio" name="element28" value="existe"></td>
-                            <td><input type="radio" name="element28" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-               • Consultation Hors périmètre.</td>
-               <td><input type="radio" name="element29" value="existe"></td>
-                            <td><input type="radio" name="element29" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Résidence.</td>
-                <td><input type="radio" name="element30" value="existe"></td>
-                            <td><input type="radio" name="element30" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                • Avis de la DOPEX ou préalable pour Import/Export et Personnes Etranger.</td>
-                <td><input type="radio" name="element31" value="existe"></td>
-                            <td><input type="radio" name="element31" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-               • Contrat de travail , Autorisation de travail pour l'étranger et carte de séjour en cour de validité.</td>
-               <td><input type="radio" name="element32" value="existe"></td>
-                            <td><input type="radio" name="element32" value="nexistepas"></td>
-            </tr>
-            <tr>
-                <td>
-                    <div id="bouttons">
-                        <input type="checkbox" id="autre" name="other" value="autre" onclick="showAutre()">
-                        <label for="autre">autre</label>
-                        <textarea id="autreTexte" name="autreTexte" class="hidden" placeholder="Écrivez ici..."></textarea><br>
-                    </div>
-                </td>
-            </tr>
-        </tbody>
-        </table>
-                <br></br>
-            </div>
-
-
-            <div id="bouttons">
-                <input type="radio" id="conforme" name="conformity" value="conforme">
-                <label for="conforme">Conforme</label>
-                <input type="radio" id="nonconforme" name="conformity" value="nonconforme">
-                <label for="nonconforme">Non Conforme</label>
-            </div>
-            
-            <button type="submit" name="save">envoyer</button>
-        </form>
-    </div>
-    <script>
-        function showListe(type) {
-            document.getElementById('listeMorale').classList.add('hidden');
-            document.getElementById('listePhysique').classList.add('hidden');
-            if (type === 'morale') {
-                document.getElementById('listeMorale').classList.remove('hidden');
-            } else if (type === 'physique') {
-                document.getElementById('listePhysique').classList.remove('hidden');
-            }
-        }
-      
+                    <p class="description15">Pour l'Association :</p>
+                   • Copie de la pièce d'identité biométrique du Président et trésorier.</td>
+                   <td><input type="radio" name="element15" value="existe"></td>
+                                <td><input type="radio" name="element15" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td class="description16">
+                    • Copie de l'agrément de l'association délivré par l'autorité compétente et publier dans un journal quotidien.</td>
+                    <td><input type="radio" name="element16" value="existe"></td>
+                                <td><input type="radio" name="element16" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td class="description17">
+                    • Statuts de l'association et liste des personnes chargées de son administration et ses modificatifs.</td>
+                    <td><input type="radio" name="element17" value="existe"></td>
+                                <td><input type="radio" name="element17" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="bouttons">
+                            <input type="checkbox" id="autrePhysiqueMorale" name="other" value="autre" onclick="showAutre('morale')">
+                            <label for="autrePhysiqueMorale">Autre </label>
+                            <textarea id="autreTexteMorale" name="autreTexte" class="hidden" placeholder="Écrivez ici..."></textarea>
+                        </div>
+                    </td>
+                </tr>
+                
+            </tbody>
+            </table>
+                </div>
+                <div id="listePhysique" class="hidden">
+                    <table class="table-container">
+                        <thead>
+                            <tr>
+                                <th>Élément</th>
+                                <th>Existe</th>
+                                <th>N'existe pas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                    <tr>
+                        <td>
+                            • Copie de la piéce d'identité biométrique du Gérant/passeport pour les étrangers.
+                        </td>
+                        <td><input type="radio" name="element18" value="existe"></td>
+                                <td><input type="radio" name="element18" value="nexistepas"></td>
+                    </tr>
+                    <tr>
+                        <td>
+                    • Demande d'ouverture compte connaissance du client et la convention de compte.</td>
+                    <td><input type="radio" name="element19" value="existe"></td>
+                                <td><input type="radio" name="element19" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Copie du Registre de commerce et/ou copie de l'agrément présenté, le cas échéant.</td>
+                    <td><input type="radio" name="element20" value="existe"></td>
+                                <td><input type="radio" name="element20" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Carte d'artisanat pour un artisan.</td>
+                    <td><input type="radio" name="element21" value="existe"></td>
+                                <td><input type="radio" name="element21" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                  • Un justificatif d'activité pour les professions libérales (Copie d'Agrément et Copie d'Inscription au tableau d'ordre ).</td>
+                  <td><input type="radio" name="element22" value="existe"></td>
+                                <td><input type="radio" name="element22" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Lettre d'engagement remplir par la relation et spécimen de signature (CA109).</td>
+                    <td><input type="radio" name="element23" value="existe"></td>
+                                <td><input type="radio" name="element23" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • SYRON KYC pour (société, gérants  associées) et sa fiche approprie remplir par la relation (questionnaire).</td>
+                    <td><input type="radio" name="element24" value="existe"></td>
+                                <td><input type="radio" name="element24" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                   •FATCA.</td>
+                   <td><input type="radio" name="element25" value="existe"></td>
+                                <td><input type="radio" name="element25" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                 • Consultation Fichier clientèle et Interdit chéquier.</td>
+                 <td><input type="radio" name="element26" value="existe"></td>
+                                <td><input type="radio" name="element26" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Décision de désignation des personnes habilitées à faire fonctionner le compte (Bac 14)/Procuration notariée pour tiers / BAC 14.</td>
+                    <td><input type="radio" name="element27" value="existe"></td>
+                                <td><input type="radio" name="element27" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                • Copie du Numéro d'Identification Fiscale (NIF) et Numéro d'Identification Statistiques (NIS) présentés.</td>
+                <td><input type="radio" name="element28" value="existe"></td>
+                                <td><input type="radio" name="element28" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                   • Consultation Hors périmètre.</td>
+                   <td><input type="radio" name="element29" value="existe"></td>
+                                <td><input type="radio" name="element29" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Résidence.</td>
+                    <td><input type="radio" name="element30" value="existe"></td>
+                                <td><input type="radio" name="element30" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                    • Avis de la DOPEX ou préalable pour Import/Export et Personnes Etranger.</td>
+                    <td><input type="radio" name="element31" value="existe"></td>
+                                <td><input type="radio" name="element31" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                   • Contrat de travail , Autorisation de travail pour l'étranger et carte de séjour en cour de validité.</td>
+                   <td><input type="radio" name="element32" value="existe"></td>
+                                <td><input type="radio" name="element32" value="nexistepas"></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div id="bouttons">
+                            <input type="checkbox" id="autrePhysiquePhysique" name="other" value="autre" onclick="showAutre('physique')">
+                            <label for="autrePhysiquePhysique">Autre </label>
+                            <textarea id="autreTextePhysique" name="autreTexte" class="hidden" placeholder="Écrivez ici..."></textarea>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            </table>
+                    <br></br>
+                </div>
     
-
-        function showNonConforme() {
-            document.getElementById('nonConformeListe').classList.remove('hidden');
-        }
-
-        function showAutre() {
-            var checkBox = document.getElementById('autre');
-            var textArea = document.getElementById('autreTexte');
-            
-            if (checkBox.checked) {
-                textArea.classList.remove('hidden');
-            } else {
-                textArea.classList.add('hidden');
+    
+                <div id="bouttons">
+                    <input type="radio" id="conforme" name="conformity" value="conforme">
+                    <label for="conforme">Conforme</label>
+                    <input type="radio" id="nonconforme" name="conformity" value="nonconforme">
+                    <label for="nonconforme">Non Conforme</label>
+                </div>
+                
+                <button type="submit" name="save">envoyer</button>
+            </form>
+        </div>
+        <script>
+            function showListe(type) {
+                document.getElementById('listeMorale').classList.add('hidden');
+                document.getElementById('listePhysique').classList.add('hidden');
+                if (type === 'morale') {
+                    document.getElementById('listeMorale').classList.remove('hidden');
+                } else if (type === 'physique') {
+                    document.getElementById('listePhysique').classList.remove('hidden');
+                }
             }
-        }
-
-        document.getElementById('suivant').addEventListener('click', function() {
-            // Logic to fetch and display next profile from the database
-        });
-    </script>
-</body>
-</html>
+            function showNonConforme() {
+                document.getElementById('nonConformeListe').classList.remove('hidden');
+            }
+        </script>
+        <script>
+            function showAutre(type) {
+                var checkBox = document.getElementById('autrePhysique' + type.charAt(0).toUpperCase() + type.slice(1));
+                var textArea = document.getElementById('autreTexte' + type.charAt(0).toUpperCase() + type.slice(1));
+        
+                if (checkBox.checked) {
+                    textArea.classList.remove('hidden');
+                } else {
+                    textArea.classList.add('hidden');
+                }
+            }
+            // Add more JavaScript functions as needed
+        </script>
+            
+    </body>
+    </html>
