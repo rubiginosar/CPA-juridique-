@@ -5,28 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
     <title>Validation</title>
+      <title>Validation</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f8ff;
+            background-color: #f0f4f8; /* Fond bleu clair */
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            color: #333;
         }
-        
         #container {
             width: 80%;
-            margin: 20px auto;
+            margin: 40px auto;
             background-color: #fff;
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
         }
         #header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
         }
         #logo-container {
             flex-grow: 1;
@@ -40,17 +43,24 @@
             margin-bottom: 20px;
         }
         table, th, td {
-            border: 1px solid #ddd;
+            border: 1px solid #e0e0e0;
         }
         th, td {
-            padding: 8px;
+            padding: 12px;
             text-align: left;
         }
         th {
-            background-color: #f2f2f2;
+            background-color: #1e88e5; /* Bleu foncé pour l'en-tête */
+            color: #fff;
+        }
+        td {
+            background-color: #f9f9f9; /* Fond des cellules */
+        }
+        tr:nth-child(even) td {
+            background-color: #f1f1f1; /* Bandes alternées */
         }
         button {
-            background-color: #4da3ff;
+            background-color: #42a5f5; /* Bleu clair pour les boutons */
             color: #fff;
             border: none;
             padding: 8px 16px;
@@ -60,21 +70,21 @@
             transition: background-color 0.3s ease;
         }
         button:hover {
-            background-color: #3688e3;
+            background-color: #1e88e5; /* Bleu plus foncé au survol */
         }
         img {
-            width: 250px;
+            width: 150px;
         }
         a {
             display: inline-block;
             text-decoration: none;
-            color: #0056b3;
+            color: #1e88e5;
             font-weight: bold;
             font-size: 16px;
             transition: color 0.3s;
         }
         a:hover {
-            color: #003d80;
+            color: #0d47a1; /* Bleu plus foncé au survol */
         }
         .icon {
             font-size: 24px;
