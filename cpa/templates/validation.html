@@ -3,181 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
     <title>Validation</title>
-      <title>Validation</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8; /* Fond bleu clair */
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            color: #333;
-        }
-        
-        #container {
-            width: 80%;
-            margin: 40px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-        }
-        #header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e0e0e0;
-        }
-        #logo-container {
-            flex-grow: 1;
-        }
-        #logout-container {
-            flex-shrink: 0;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 20px;
-        }
-        table, th, td {
-            border: 1px solid #e0e0e0;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background-color: #1e88e5; /* Bleu foncé pour l'en-tête */
-            color: #fff;
-        }
-        td {
-            background-color: #f9f9f9; /* Fond des cellules */
-        }
-        tr:nth-child(even) td {
-            background-color: #f1f1f1; /* Bandes alternées */
-        }
-        button {
-            background-color: #42a5f5; /* Bleu clair pour les boutons */
-            color: #fff;
-            border: none;
-            padding: 8px 16px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #1e88e5; /* Bleu plus foncé au survol */
-        }
-        img {
-            width: 150px;
-        }
-        a {
-            display: inline-block;
-            text-decoration: none;
-            color: #1e88e5;
-            font-weight: bold;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-        a:hover {
-            color: #0d47a1; /* Bleu plus foncé au survol */
-        }
-        .icon {
-            font-size: 24px;
-            vertical-align: middle;
-        }
-        .nav-text {
-            vertical-align: middle;
-        }
+        /* Your CSS styles here */
     </style>
 </head>
 <body>
-    <div id="container">
-        <div id="header">
-            <div id="logo-container">
-                <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
-            </div>
-            <div id="logout-container">
-                <a href="{{ url_for('index') }}">
-                    <i class='bx bx-log-out icon'></i>
-                    <span class="text nav-text">Logout</span>
-                </a>
-            </div>
-        </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>ID Client</th>
-                    <th>État</th>
-                    <th>Descriptif</th>
-                    <th>Folio</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody id="data-table-body">
-                <!-- Data will be inserted here via JavaScript -->
-            </tbody>
-        </table>
-    </div>
+    <h1>Validation Dossiers</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Num Compte</th>
+                <th>Etat</th>
+                <th>Folio</th>
+                <th>Elements</th>
+                <th>Date de Reception</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="data-table-body">
+            {% for dossier in dossiers %}
+            <tr>
+                <td>{{ dossier.num_compte }}</td>
+                <td>{{ dossier.etat }}</td>
+                <td>{{ dossier.folio }}</td>
+                <td>
+                    <ul>
+                        {% for element in dossier.elements %}
+                        <li>{{ element }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>
+                    <input type="date" name="date_reception_{{ loop.index }}">
+                </td>
+                <td>
+                    <form action="/validate" method="post" onsubmit="return onSubmitForm(this);">
+                        <input type="hidden" name="id_client" value="{{ dossier.id_client }}">
+                        <input type="hidden" name="num_compte" value="{{ dossier.num_compte }}">
+                        <button type="submit">Validate</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            fetch('/get_data')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('data-table-body');
-                    tableBody.innerHTML = '';
-                    data.forEach(entry => {
-                        const row = document.createElement('tr');
-                        
-                        const idClientCell = document.createElement('td');
-                        idClientCell.textContent = entry.idclient;
-                        row.appendChild(idClientCell);
-                        
-                        const etatCell = document.createElement('td');
-                        etatCell.textContent = entry.etat;
-                        row.appendChild(etatCell);
-                        
-                        const descriptifCell = document.createElement('td');
-                        descriptifCell.textContent = entry.descriptif;
-                        row.appendChild(descriptifCell);
-                        
-                        const folioCell = document.createElement('td');
-                        folioCell.textContent = entry.folio;
-                        row.appendChild(folioCell);
-                        
-                        const actionCell = document.createElement('td');
-                        const form = document.createElement('form');
-                        form.action = '/validate';
-                        form.method = 'post';
-                        
-                        const input = document.createElement('input');
-                        input.type = 'hidden';
-                        input.name = 'idclient';
-                        input.value = entry.idclient;
-                        form.appendChild(input);
-                        
-                        const button = document.createElement('button');
-                        button.type = 'submit';
-                        button.textContent = 'Validate';
-                        form.appendChild(button);
-                        
-                        actionCell.appendChild(form);
-                        row.appendChild(actionCell);
-                        
-                        tableBody.appendChild(row);
-                    });
-                })
-                .catch(error => console.error('Error fetching data:', error));
-        });
+        function onSubmitForm(form) {
+            const numCompte = form.querySelector('input[name="num_compte"]').value;
+            console.log('Num Compte:', numCompte);
+
+            // Optionally, you can perform additional actions with numCompte here
+
+            // Return true to allow the form submission to proceed
+            return true;
+        }
     </script>
 </body>
 </html>
-
-
