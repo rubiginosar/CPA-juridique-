@@ -168,7 +168,30 @@ def etude():
     # Handle GET request (render form)
     return render_template('etude.html')
 
-
+*******************************************************
+@app.route('/today_dossiers')
+def today_dossiers():
+    try:
+        cur = mysql.connect().cursor()
+        cur.execute("""
+            SELECT d.num_compte, d.nom, d.prenom, dt.daterecp, dt.dateenvoi
+            FROM dossier d
+            JOIN datetransmis dt ON d.idclient = dt.idclient
+            WHERE DATE(dt.daterecp) = CURDATE() OR DATE(dt.dateenvoi) = CURDATE()
+        """)
+        dossiers = cur.fetchall()
+        cur.close()
+        
+        # Convert data to a list of dictionaries for JSON serialization
+        dossiers_list = [{'num_compte': row[0], 'nom': row[1], 'prenom': row[2], 'date_reception': row[3], 'date_envoi': row[4]} for row in dossiers]
+        
+        return jsonify(dossiers_list)
+    
+    except Exception as e:
+        print(f"Error fetching today's dossiers: {e}")
+        return jsonify([])
+        #NESRIIIINIE ANA HNA NI NKHDAM B flaskext DONC NTI VERIFIER 9BL#
+****************************************************************************
 @app.route('/validation')
 def validation():
     return render_template('validation.html')
