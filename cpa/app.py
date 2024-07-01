@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, json 
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, send_file
 from flask_mysqldb import MySQL
 import MySQLdb.cursors
 from datetime import datetime
+import pandas as pd
+from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -313,6 +315,33 @@ def validate_dossier():
     except Exception as e:
         print(f"Error validating dossier: {e}")
         return 'An error occurred while processing the validation.'
+    
+@app.route('/download_excel', methods=['GET'])
+def download_excel():
+    try:
+        cur = mysql.connect.cursor()
+        cur.execute("""
+            SELECT d.num_compte, d.nom, d.prenom, dt.daterecp, dt.dateenvoi, dt.etat, dt.descriptif, dt.folio
+            FROM datetransmis dt
+            INNER JOIN dossier d ON d.id_client = dt.id_client
+        """)
+        dossiers = cur.fetchall()
+        cur.close()
+
+        # Create a DataFrame from the fetched data
+        df = pd.DataFrame(dossiers, columns=['Numéro de Compte', 'Nom', 'Prénom', 'Date de Réception', 'Date d\'Envoi', 'État', 'Descriptif', 'Folio'])
+
+        # Save the DataFrame to an Excel file
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Dossiers')
+        output.seek(0)
+
+        return send_file(output, download_name='dossiers.xlsx', as_attachment=True)
+
+    except Exception as e:
+        print(f"Error generating Excel file: {e}")
+        return 'An error occurred while generating the Excel file.', 500
     
 @app.route('/directeur')
 def directeur():
