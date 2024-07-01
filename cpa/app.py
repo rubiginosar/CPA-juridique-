@@ -167,6 +167,68 @@ def etude():
 
     # Handle GET request (render form)
     return render_template('etude.html')
+**************************************************************
+ani nkhdam b flaskext   chofi page etude hadik autre makantch tmchi tsma sagamtha 
+@app.route('/etude', methods=['GET', 'POST'])
+def ch_etude():
+    if request.method == 'POST':
+        cur = mysql.connection.cursor()
+
+        # Récupération de id_client et autres données du formulaire
+        num_comp = request.form.get('num_com')
+        cur.execute("SELECT idclient , datereception FROM dossier WHERE num_compte=%s;", (num_comp,))
+        row = cur.fetchone()
+
+        if row is None:
+            cur.close()
+            return 'Aucun client trouvé avec l\'identifiant fourni.', 404
+        
+        id_client = row['idclient']
+        datereception = row['datereception']
+        
+        # Collecte des éléments marqués comme 'nexistepas'
+        elements = []
+        for i in range(0, 33):  # Ajustez la plage en fonction du nombre d'éléments dans votre formulaire
+            key_element = f'element{i}'
+            if request.form.get(key_element) == 'nexistepas':
+                elements.append((id_client, i))  # Inclure id_client et le numéro d'élément
+        
+        # Déterminer quel textarea utiliser en fonction de la sélection de l'utilisateur
+        personne_type = request.form.get('personne')
+        autre_texte = None
+        
+        if personne_type == 'morale':
+            autre_texte = request.form.get('autreTexteMorale')
+        elif personne_type == 'physique':
+            autre_texte = request.form.get('autreTextePhysique')
+        
+        if autre_texte:
+            elements.append((id_client, autre_texte))
+        
+        try:
+            # Insérer dans la table docs
+            sql = "INSERT INTO docs (idclient, element) VALUES (%s, %s)"
+            for element in elements:
+                cur.execute(sql, element)  # Exécuter la requête avec chaque tuple d'élément
+                mysql.connection.commit()
+
+            # Insérer dans la table datetransmis
+            cur.execute("""
+                INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, IDCLIENT, FOLIO)
+                VALUES (%s, %s, %s, %s, %s, %s)""",
+                        (datereception, datetime.now().strftime('%Y-%m-%d'), request.form.get('conformity'), autre_texte, id_client, session.get('folio')))
+            mysql.connection.commit()
+
+            cur.close()
+            return render_template('etude.html', num_com=num_comp, datereception=datereception)
+        
+        except Exception as e:
+            # Gérer les exceptions (par exemple, les erreurs de base de données)
+            print(f"Erreur lors de la soumission du formulaire d'étude : {str(e)}")
+            return 'Une erreur est survenue lors du traitement du formulaire. Veuillez réessayer plus tard.', 500
+
+    # Gérer la requête GET (afficher le formulaire)
+    return render_template('etude.html')
 
 *******************************************************
 @app.route('/today_dossiers')
