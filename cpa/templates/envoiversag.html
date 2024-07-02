@@ -7,60 +7,184 @@
 <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
 <style>
       
-    /* Reset CSS */
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    body  {
+   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f9; /* Light grey background */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f4f4f9; /* Light grey background */
-        margin: 0;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+.header {
+    width: 100%;
+    background-color: #ffffff; /* White background */
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+}
+
+.header img {
+    height: 50px; /* Adjust height as needed */
+    margin-left: 20px; /* Add margin to the left of the logo */
+}
+
+.header a {
+    color: #0056b3; /* Blue text color */
+    text-decoration: none;
+    margin-right: 20px; /* Add margin to the right of the links */
+    padding: 10px;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.header a:hover {
+    color: #003d80; /* Darker blue on hover */
+}
+
+.container {
+    background-color: #ffffff; /* White background */
+    border: 2px solid #d1d1d1; /* Darker grey border to enhance visibility */
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top: 80px; /* Add margin at the top to avoid overlapping with the fixed header */
+}
+form{
+    background-color: #ffffff; /* White background */
+    border: 1px solid #d1d1d1 ; /* Darker grey border to enhance visibility */
+    border-radius: 8px;  
+    border-radius: 8px;
+    padding: 30px;
+    width: 90%%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin-top:80px; /* Add margin at the top to avoid overlapping with the fixed header */
+}
+h2 {
+    text-align: center;
+    color: #0056b3; /* Dark blue */
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    color: #333333; /* Dark grey */
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d1d1; /* Light grey border */
+    border-radius: 5px;
+    box-sizing: border-box;
+    background-color: #f9f9f9; /* Light background */
+    margin-bottom: 15px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+input[type="text"]:focus,
+input[type="date"]:focus,
+select:focus {
+    border-color: #0056b3; /* Focus border blue */
+    outline: none;
+    background-color: #ffffff; /* White background on focus */
+}
+
+input[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3; /* Button blue */
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+input[type="submit"]:hover {
+    background-color: #003d80; /* Darker blue */
+}
+a {
+    display: inline-block;
+    margin-top: 20px;
+    text-decoration: none;
+    color: #0056b3; /* Blue link color */
+    font-weight: bold;
+    font-size: 16px;
+    transition: color 0.3s;
     
-    .header {
-        width: 100%;
-        background-color: #ffffff; /* White background */
-        padding: 10px 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        top: 0;
-        left: 0;
-        z-index: 1000;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
-    }
+}
+
+a:hover {
+    color: #003d80; /* Darker blue on hover */
+}
+
+.icon {
+    font-size: 24px;
     
-    .header img {
-        height: 50px; /* Adjust height as needed */
-        margin-left: 20px; /* Add margin to the left of the logo */
-    }
-    
-    .header a {
-        color: #0056b3; /* Blue text color */
-        text-decoration: none;
-        margin-right: 20px; /* Add margin to the right of the links */
-        padding: 10px;
-        font-weight: bold;
-        transition: color 0.3s;
-    }
-    
-    .header a:hover {
-        color: #003d80; /* Darker blue on hover */
-    }
+    vertical-align: middle;
+}  
 </style>
 </head>
 <body>
     <div class="header">
-        <img src="{{ url_for('static', filename='cpa.png') }}" alt="logo">
+        <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
         <a href="{{ url_for('secretaire') }}">
             <i class='bx bx-calendar icon'></i>Réception</a>
     </div>
+    <div id="container">
+        <form method="POST" action="/to_agence">
+         
+            <h2>Dossier envoié vers l'agence</h2>
+            <label for="date_envoin">Date de Envoi:</label>
+            <input type="date" id="date_envoi" name="date_envoi" required>
+
+            <label for="num_compte">Num compte:</label>
+            <input type="text" id="num_compte" name="num_compte" required>
+
+            <label for="agence">Agence:</label>
+            <select id="agence" name="agence" required>
+                    <!-- Options will be populated by JavaScript -->
+            </select>
+
+                <input type="submit" value="Envoyer">
+                <a href="{{ url_for('index') }}">
+                    <i class='bx bx-log-out icon'></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </form>
+
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/get_agences')
+                .then(response => response.json())
+                .then(data => {
+                    const agenceSelect = document.getElementById('agence');
+        
+                    data.forEach(agence => {
+                        const optionAgence = document.createElement('option');
+                        optionAgence.value = agence.intitule;  // Set the value to the agency intitule
+                        optionAgence.textContent = agence.intitule;  // Set the text to the agency intitule
+                        agenceSelect.appendChild(optionAgence);
+                    });
+                });
+        });
+    </script>
 </body>
 </html>
+
