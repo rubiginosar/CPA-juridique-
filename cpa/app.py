@@ -346,7 +346,49 @@ def download_excel():
 @app.route('/directeur')
 def directeur():
     return render_template('directeur.html')
+***************************************************************************************************
+the rouuuutes bach tmchik la page 2 ta3 secretaireee !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+@app.route('/envoiversag', methods=['GET', 'POST'])
+def envoiversagence():
+    return render_template('envoiversag.html')
 
+@app.route('/to_agence', methods=['POST'])
+def to_agence():
+    date_envoi = request.form['date_envoi']
+    num_compte = request.form['num_compte']
+    agence = request.form['agence']
+    
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # Query to get id_client based on num_compte
+    query = "SELECT id_client FROM dossier WHERE num_compte = %s"
+    cursor.execute(query, (num_compte,))
+    result = cursor.fetchone()
+
+    if result:
+        id_client = result[0]
+        folio = session.get('folio')  # Ensure folio is retrieved from session
+
+        if folio is None:
+            cursor.close()
+            conn.close()
+            return "Folio is missing from session", 400
+
+        # Insert into datetransmis
+        insert_query = "INSERT INTO datetransmis (dateenvoi, id_client, nom_agence, folio) VALUES (%s, %s, %s, %s)"
+        cursor.execute(insert_query, (date_envoi, id_client, agence, folio))
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return render_template('envoiversag.html')  # Redirect to a success page or another route
+    else:
+        cursor.close()
+        conn.close()
+        return "Num compte not found", 404  # Return an error if num_compte not found
+***********************************************************************************************************************
 if __name__ == '__main__':
     app.run(debug=True)
 
