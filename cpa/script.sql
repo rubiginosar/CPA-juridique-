@@ -46,7 +46,7 @@ CREATE TABLE datetransmis (
     CONSTRAINT fk_folio FOREIGN KEY (folio) REFERENCES utilisateur(folio),
     CONSTRAINT fk_id_client FOREIGN KEY (id_client) REFERENCES dossier(id_client)
 );
-
+alter table datetransmis add nom_agence varchar(70);         /*zedttttttt atttribuuuuuuuuuuuut la table datetransmiiis*/
 DELIMITER //
 
 CREATE TRIGGER before_insert_datetransmis
