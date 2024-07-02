@@ -6,8 +6,94 @@
     <link href="https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css" rel="stylesheet">
     <title>Validation</title>
     <style>
-        /* Your CSS styles here */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8; /* Fond bleu clair */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color: #333;
+        }
+        #container {
+            width: 80%;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        #logo-container {
+            flex-grow: 1;
+        }
+        #logout-container {
+            flex-shrink: 0;
+        }
+        h1 {
+            color: #1e88e5; /* Bleu primaire pour les titres */
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #1e88e5; /* Bleu primaire pour les cellules d'en-tête */
+            color: white;
+        }
+        td {
+            background-color: #f0f4f8; /* Fond bleu clair pour les cellules de données */
+        }
+        button {
+            background-color: #42a5f5; /* Bleu clair pour les boutons */
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1e88e5; /* Bleu plus foncé au survol */
+        }
+        img {
+            width: 250px;
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: #1e88e5;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #0d47a1; /* Bleu plus foncé au survol */
+        }
+        .icon {
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        .nav-text {
+            vertical-align: middle;
+        }
     </style>
+
 </head>
 <body>
     <h1>Validation Dossiers</h1>

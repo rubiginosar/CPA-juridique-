@@ -97,3 +97,4 @@ INSERT INTO utilisateur (FOLIO, MDP, NOM, PRENOM, QUALITE) VALUES
          ('33333', '33333', 'Charge Validation', '', 'Charge de validation'),
          ('44444', '44444', 'Directeur', '', 'Directeur');
 
+alter table datetransmis add date_agence date;

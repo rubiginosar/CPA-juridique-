@@ -201,13 +201,19 @@
     .nav-text {
         vertical-align: middle;
     }
+
+    
+    .small-logo {
+            width: 200px;
+            height: auto; 
+            }
     </style>
 </head>
 <body>
     <div id="container">
         <div id="header">
             <div id="logo-container">
-                <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
+                <img src="{{ url_for('static', filename='cpa.jpeg') }}" alt="logo" class="small-logo">
             </div>
             <div id="logout-container">
                 <a href="{{ url_for('index') }}">
