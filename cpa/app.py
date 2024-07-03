@@ -350,7 +350,6 @@ def directeur():
 @app.route('/envoiversag', methods=['GET', 'POST'])
 def envoiversagence():
     return render_template('envoiversag.html')
-
 @app.route('/to_agence', methods=['POST'])
 def to_agence():
     date_envoi = request.form['date_envoi']
@@ -358,28 +357,43 @@ def to_agence():
     agence = request.form['agence']
     print(agence)
     
-    cursor = mysql.connect.cursor()
+    try:
+        connection = mysql.connect
+        cursor = connection.cursor()
 
-    # Query to get id_client based on num_compte
-    cursor.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (num_compte,))
-    id_client = cursor.fetchone()[0]
-    print(id_client)
+        # Query to get id_client based on num_compte
+        cursor.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (num_compte,))
+        result = cursor.fetchone()
+        
+        if result is None:
+            print("No id_client found for the given num_compte")
+            return render_template('envoiversag.html')  # Handle this case appropriately
+        
+        id_client = result[0]
+        print(id_client)
 
+        folio = session.get('folio')  # Ensure folio is retrieved from session
 
-    folio = session.get('folio')  # Ensure folio is retrieved from session
+        if not folio:
+            print("Folio not found in session")
+            return render_template('envoiversag.html')  # Handle this case appropriately
 
+        # Insert into datetransmis
+        insert_query = """
+        INSERT INTO datetransmis (descriptif, id_client, folio, date_agence) 
+        VALUES (%s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (agence, id_client, folio, date_envoi))
+        connection.commit()
 
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        connection.rollback()
+        return render_template('envoiversag.html')  # Handle this case appropriately
 
-    # Insert into datetransmis
-    insert_query = """
-    INSERT INTO datetransmis (descriptif, id_client, folio, date_agence) 
-    VALUES (%s, %s, %s, %s)
-    """
-    cursor.execute(insert_query, (agence, id_client, folio, date_envoi))
-    mysql.connect.commit()
-
-    cursor.close()
-    mysql.connect.commit()
+    finally:
+        cursor.close()
+        connection.close()
 
     return render_template('envoiversag.html')  # Redirect to a success page or another route
 
