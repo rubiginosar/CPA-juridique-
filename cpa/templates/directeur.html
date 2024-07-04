@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    <title>Directeur</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8; /* Light blue background */
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color: #333;
+        }
+        #container {
+            width: 80%;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+        #header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        #logo-container img {
+            width: 150px;
+        }
+        #logout-container {
+            flex-shrink: 0;
+        }
+        h1 {
+            color: #1e88e5; /* Primary blue for headings */
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #1e88e5; /* Primary blue for header cells */
+            color: white;
+        }
+        td {
+            background-color: #f0f4f8; /* Light blue background for data cells */
+        }
+        button {
+            background-color: #42a5f5; /* Light blue for buttons */
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #1e88e5; /* Darker blue on hover */
+        }
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: #1e88e5;
+            font-weight: bold;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+        a:hover {
+            color: #0d47a1; /* Darker blue on hover */
+        }
+        .icon {
+            font-size: 24px;
+            vertical-align: middle;
+        }
+        .nav-text {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <div id="logo-container">
+                <img src="{{ url_for('static', filename='cropped.png') }}" alt="logo">
+            </div>
+            <div id="logout-container">
+                <a href="{{ url_for('index') }}">
+                    <i class='bx bx-log-out icon'></i>
+                    <span class="text nav-text">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <h1>Tableau des dossiers</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID Client</th>
+                    <th>Num Compte</th>
+                    <th>Date Réception</th>
+                    <th>Date Envoi</th>
+                    <th>État</th>
+                    <th>Folio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                    <td>{{ row[5] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
+
+
+
+/*app.py */
+@app.route('/directeur')
+def directeur():
+    try:
+        # Connexion à la base de données
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        # Exécution de la requête SQL
+        sql = """
+        SELECT d.id_client, d.num_compte, dt.daterecp, dt.dateenvoi, dt.etat, dt.folio
+        FROM dossier d
+        LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
+        """
+        cursor.execute(sql)
+        results = cursor.fetchall()
+
+        # Fermeture du curseur et de la connexion
+        cursor.close()
+        conn.close()
+
+        return render_template('directeur.html', results=results)
+    
+    except Exception as e:
+        return str(e)
