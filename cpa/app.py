@@ -343,10 +343,6 @@ def download_excel():
         print(f"Error generating Excel file: {e}")
         return 'An error occurred while generating the Excel file.', 500
     
-@app.route('/directeur')
-def directeur():
-    return render_template('directeur.html')
-
 @app.route('/envoiversag', methods=['GET', 'POST'])
 def envoiversagence():
     return render_template('envoiversag.html')
@@ -397,7 +393,47 @@ def to_agence():
 
     return render_template('envoiversag.html')  # Redirect to a success page or another route
 
-    
+
+************************************************************************************************
+    /*POUR LA PAGE DIRECTEUR*/
+
+@app.route('/directeur', methods=['GET'])
+def directeur():
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    # Query to get dossier details
+    query = """
+    SELECT d.id_client, d.num_compte, dt.daterecp, dt.dateenvoi, dt.etat, dt.folio
+    FROM dossier d
+    LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
+    """
+    cursor.execute(query)
+    dossiers = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    # Print fetched data to debug
+    print("Fetched Dossiers:", dossiers)
+
+    if dossiers:
+        dossier_details = [{
+            'id_client': dossier[0],
+            'num_compte': dossier[1],
+            'daterecp': dossier[2],
+            'dateenvoi': dossier[3],
+            'etat': dossier[4],
+            'folio': dossier[5]
+        } for dossier in dossiers]
+        return jsonify(dossier_details)
+    else:
+        return jsonify([]), 404
+
+@app.route('/directeur_page', methods=['GET'])
+def directeur_page():
+    return render_template('directeur.html')
+
+*******************************************************************************************************************
 if __name__ == '__main__':
     app.run(debug=True)
 
