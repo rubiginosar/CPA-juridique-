@@ -8,7 +8,7 @@
     <style>
         body {
             font-family: 'Arial', sans-serif;
-            background-color: #f0f4f8; /* Light blue background */
+            background-color: #f7f9fc;
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -17,7 +17,7 @@
         #container {
             width: 80%;
             margin: 40px auto;
-            background-color: #fff;
+            background-color: #ffffff;
             padding: 20px;
             border-radius: 12px;
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -37,39 +37,70 @@
             flex-shrink: 0;
         }
         h1 {
-            color: #1e88e5; /* Primary blue for headings */
+            color: #1e88e5;
             margin-bottom: 20px;
+            text-align: center;
+            font-size: 28px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
             border: 1px solid #ccc;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
             border: 1px solid #ccc;
-            padding: 10px;
+            padding: 12px;
             text-align: left;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         th {
-            background-color: #1e88e5; /* Primary blue for header cells */
+            background: linear-gradient(45deg, #1e88e5, #42a5f5);
             color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+        }
+        th::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 3px;
+            background: linear-gradient(45deg, #ff8a65, #f4511e);
         }
         td {
-            background-color: #f0f4f8; /* Light blue background for data cells */
+            background-color: #f7f9fc;
+        }
+        tr:nth-child(odd) td {
+            background-color: #f0f4f8;
+        }
+        tr:hover td {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+            transform: scale(1.02);
+        }
+        .highlighted {
+            background-color: #ffebee !important;
+            color: #b71c1c !important;
         }
         button {
-            background-color: #42a5f5; /* Light blue for buttons */
+            background-color: #42a5f5;
             color: #fff;
             border: none;
-            padding: 8px 16px;
+            padding: 10px 20px;
             cursor: pointer;
             border-radius: 6px;
             font-size: 14px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, transform 0.3s ease;
         }
         button:hover {
-            background-color: #1e88e5; /* Darker blue on hover */
+            background-color: #1e88e5;
+            transform: translateY(-2px);
         }
         a {
             display: inline-block;
@@ -80,7 +111,7 @@
             transition: color 0.3s;
         }
         a:hover {
-            color: #0d47a1; /* Darker blue on hover */
+            color: #0d47a1;
         }
         .icon {
             font-size: 24px;
@@ -88,6 +119,11 @@
         }
         .nav-text {
             vertical-align: middle;
+        }
+        #error-message {
+            color: red;
+            text-align: center;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -106,8 +142,7 @@
         </div>
 
         <h1>Tableau des dossiers</h1>
-
-        <table>
+        <table id="dossier-table">
             <thead>
                 <tr>
                     <th>ID Client</th>
@@ -119,44 +154,69 @@
                 </tr>
             </thead>
             <tbody>
-                {% for row in results %}
-                <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
-                    <td>{{ row[3] }}</td>
-                    <td>{{ row[4] }}</td>
-                    <td>{{ row[5] }}</td>
-                </tr>
-                {% endfor %}
+                <!-- Rows will be added here by JavaScript -->
             </tbody>
         </table>
+        <p id="error-message"></p>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/directeur')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#dossier-table tbody');
+                    if (data.length > 0) {
+                        data.forEach(dossier => {
+                            const row = document.createElement('tr');
+                            row.innerHTML = `
+                                <td>${dossier.id_client}</td>
+                                <td>${dossier.num_compte}</td>
+                                <td>${dossier.daterecp || ''}</td>
+                                <td>${dossier.dateenvoi}</td>
+                                <td>${dossier.etat || ''}</td>
+                                <td>${dossier.folio}</td>
+                            `;
+                            tableBody.appendChild(row);
+
+                            // Calculate the duration between date_reception and date_envoi
+                            const dateReception = new Date(dossier.daterecp);
+                            const dateEnvoi = new Date(dossier.dateenvoi);
+                            if (dossier.daterecp && dossier.dateenvoi) {
+                                const duration = (dateEnvoi - dateReception) / (1000 * 60 * 60 * 24);
+
+                                // Highlight the row in red if the duration exceeds 20 days
+                                if (duration > 20) {
+                                    row.classList.add('highlighted');
+                                }
+                            }
+
+                            // Ajouter le commentaire si id_client, num_compte, dateenvoi et folio sont présents mais daterecp et etat sont nulles
+                            if (dossier.id_client && dossier.num_compte && dossier.dateenvoi && dossier.folio && !dossier.daterecp && !dossier.etat) {
+                                const commentRow = document.createElement('tr');
+                                const commentCell = document.createElement('td');
+                                commentCell.setAttribute('colspan', '6');
+                                commentCell.textContent = 'Envoi vers l\'agence';
+                                commentCell.style.color = 'blue';
+                                commentCell.style.fontStyle = 'italic';
+                                commentCell.style.backgroundColor = '#e0f7fa';
+                                commentRow.appendChild(commentCell);
+                                tableBody.appendChild(commentRow);
+                            }
+                        });
+                    } else {
+                        document.getElementById('error-message').textContent = 'Numéro de compte non trouvé ou pas de dossier pour Charge Étude.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('error-message').textContent = 'Erreur lors de la récupération des données.';
+                });
+        });
+    </script>
 </body>
 </html>
 
 
-
-/*app.py */
-@app.route('/directeur')
-def directeur():
-    try:
-        # Connexion à la base de données
-        conn = mysql.connect()
-        cursor = conn.cursor()
-
-        # Exécution de la requête SQL
-        sql = """
-        SELECT d.id_client, d.num_compte, dt.daterecp, dt.dateenvoi, dt.etat, dt.folio
-        FROM dossier d
-        LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
-        """
-        cursor.execute(sql)
-        results = cursor.fetchall()
-
-        # Fermeture du curseur et de la connexion
-        cursor.close()
-        conn.close()
 
         return render_template('directeur.html', results=results)
     
