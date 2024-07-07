@@ -354,8 +354,7 @@ def to_agence():
     print(agence)
     
     try:
-        connection = mysql.connect
-        cursor = connection.cursor()
+        cursor = mysql.connect.cursor()
 
         # Query to get id_client based on num_compte
         cursor.execute("SELECT id_client FROM dossier WHERE num_compte=%s;", (num_compte,))
@@ -380,27 +379,24 @@ def to_agence():
         VALUES (%s, %s, %s, %s)
         """
         cursor.execute(insert_query, (agence, id_client, folio, date_envoi))
-        connection.commit()
+        mysql.connect.commit()
 
     except Exception as e:
         print(f"An error occurred: {e}")
-        connection.rollback()
+        mysql.connect.rollback()
         return render_template('envoiversag.html')  # Handle this case appropriately
 
     finally:
         cursor.close()
-        connection.close()
+        mysql.connect.close()
 
     return render_template('envoiversag.html')  # Redirect to a success page or another route
 
 
-************************************************************************************************
-    /*POUR LA PAGE DIRECTEUR*/
 
 @app.route('/directeur', methods=['GET'])
 def directeur():
-    conn = mysql.connect()
-    cursor = conn.cursor()
+    cur = mysql.connect.cursor()
 
     # Query to get dossier details
     query = """
@@ -408,10 +404,10 @@ def directeur():
     FROM dossier d
     LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
     """
-    cursor.execute(query)
-    dossiers = cursor.fetchall()
-    cursor.close()
-    conn.close()
+    cur.execute(query)
+    dossiers = cur.fetchall()
+    cur.close()
+
 
     # Print fetched data to debug
     print("Fetched Dossiers:", dossiers)
@@ -433,7 +429,6 @@ def directeur():
 def directeur_page():
     return render_template('directeur.html')
 
-*******************************************************************************************************************
 if __name__ == '__main__':
     app.run(debug=True)
 
