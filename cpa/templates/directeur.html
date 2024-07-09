@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -41,6 +42,43 @@
             margin-bottom: 20px;
             text-align: center;
             font-size: 28px;
+        }
+        #search-form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #search-input {
+            width: 60%;
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px 0 0 6px;
+            font-size: 16px;
+        }
+        #search-button {
+            padding: 10px 20px;
+            border: 2px solid #1e88e5;
+            border-left: none;
+            background-color: #1e88e5;
+            color: #fff;
+            border-radius: 0 6px 6px 0;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        #search-button:hover {
+            background-color: #1565c0;
+        }
+        #filter-form {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        #filter-select {
+            padding: 10px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 60%;
         }
         table {
             width: 100%;
@@ -125,6 +163,61 @@
             text-align: center;
             font-weight: bold;
         }
+        .nonconforme {
+            background-color: #ffe6e6; /* Light red background for non-conforming dossiers */
+        }
+        
+        .highlighted {
+            background-color: #e0f7fa; /* Light blue background for highlighted rows */
+        }
+        
+        td {
+            padding: 8px;
+            text-align: left;
+        }
+        
+        td[colspan="6"] {
+            color: blue;
+            font-style: italic;
+            background-color: #e0f7fa;
+        }
+        
+    </style>
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+        }
+    
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+    
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+    
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -142,6 +235,21 @@
         </div>
 
         <h1>Tableau des dossiers</h1>
+
+        <div id="search-form">
+            <input type="text" id="search-input" placeholder="Enter Num Compte...">
+            <button id="search-button">Search</button>
+        </div>
+
+        <div id="filter-form">
+            <select id="filter-select">
+                <option value="">All Dossiers</option>
+                <option value="recu_non_traite">Reçu Non Traité</option>
+                <option value="traite_envoye">Traité Envoyé</option>
+                <option value="traite_non_envoye">Traité Non Envoyé</option>
+            </select>
+        </div>
+
         <table id="dossier-table">
             <thead>
                 <tr>
@@ -159,66 +267,134 @@
         </table>
         <p id="error-message"></p>
     </div>
+    <div id="detail-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="modal-body">
+                <!-- Details will be added here by JavaScript -->
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/directeur')
-                .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.querySelector('#dossier-table tbody');
-                    if (data.length > 0) {
-                        data.forEach(dossier => {
-                            const row = document.createElement('tr');
-                            row.innerHTML = `
-                                <td>${dossier.id_client}</td>
-                                <td>${dossier.num_compte}</td>
-                                <td>${dossier.daterecp || ''}</td>
-                                <td>${dossier.dateenvoi}</td>
-                                <td>${dossier.etat || ''}</td>
-                                <td>${dossier.folio}</td>
-                            `;
-                            tableBody.appendChild(row);
-
-                            // Calculate the duration between date_reception and date_envoi
-                            const dateReception = new Date(dossier.daterecp);
-                            const dateEnvoi = new Date(dossier.dateenvoi);
-                            if (dossier.daterecp && dossier.dateenvoi) {
-                                const duration = (dateEnvoi - dateReception) / (1000 * 60 * 60 * 24);
-
-                                // Highlight the row in red if the duration exceeds 20 days
-                                if (duration > 20) {
-                                    row.classList.add('highlighted');
+            const searchButton = document.getElementById('search-button');
+            const searchInput = document.getElementById('search-input');
+            const filterSelect = document.getElementById('filter-select');
+            const dossierTableBody = document.getElementById('dossier-table').querySelector('tbody');
+            const errorMessage = document.getElementById('error-message');
+        
+            const fetchDossiers = (num_compte, filter_type) => {
+                let url = '/directeur_filtrage?';
+                if (num_compte) {
+                    url += `num_compte=${num_compte}&`;
+                }
+                if (filter_type) {
+                    url += `filter_type=${filter_type}`;
+                }
+        
+                fetch(url)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.length === 0) {
+                            errorMessage.textContent = "No dossiers found.";
+                            dossierTableBody.innerHTML = '';
+                        } else {
+                            errorMessage.textContent = '';
+                            dossierTableBody.innerHTML = '';
+        
+                            data.forEach(dossier => {
+                                const row = document.createElement('tr');
+                                row.innerHTML = `
+                                    <td>${dossier.id_client}</td>
+                                    <td>${dossier.num_compte}</td>
+                                    <td>${dossier.daterecp || '-'}</td>
+                                    <td>${dossier.dateenvoi || '-'}</td>
+                                    <td>${dossier.etat || '-'}</td>
+                                    <td>${dossier.folio || '-'}</td>
+                                `;
+                                row.dataset.idClient = dossier.id_client;
+                                row.classList.add('dossier-row');
+                                if (dossier.etat === 'nonconforme') {
+                                    row.classList.add('nonconforme');
                                 }
-                            }
-
-                            // Ajouter le commentaire si id_client, num_compte, dateenvoi et folio sont présents mais daterecp et etat sont nulles
-                            if (dossier.id_client && dossier.num_compte && dossier.dateenvoi && dossier.folio && !dossier.daterecp && !dossier.etat) {
-                                const commentRow = document.createElement('tr');
-                                const commentCell = document.createElement('td');
-                                commentCell.setAttribute('colspan', '6');
-                                commentCell.textContent = 'Envoi vers l\'agence';
-                                commentCell.style.color = 'blue';
-                                commentCell.style.fontStyle = 'italic';
-                                commentCell.style.backgroundColor = '#e0f7fa';
-                                commentRow.appendChild(commentCell);
-                                tableBody.appendChild(commentRow);
-                            }
-                        });
-                    } else {
-                        document.getElementById('error-message').textContent = 'Numéro de compte non trouvé ou pas de dossier pour Charge Étude.';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching data:', error);
-                    document.getElementById('error-message').textContent = 'Erreur lors de la récupération des données.';
-                });
+                                dossierTableBody.appendChild(row);
+        
+                                if (!dossier.daterecp && !dossier.etat) {
+                                    row.classList.add('highlighted');
+                                    const commentRow = document.createElement('tr');
+                                    const commentCell = document.createElement('td');
+                                    commentCell.setAttribute('colspan', '6');
+                                    commentCell.textContent = 'Envoi vers l\'agence';
+                                    commentCell.style.color = 'blue';
+                                    commentCell.style.fontStyle = 'italic';
+                                    commentCell.style.backgroundColor = '#e0f7fa';
+                                    commentRow.appendChild(commentCell);
+                                    dossierTableBody.appendChild(commentRow);
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching dossiers:', error);
+                        errorMessage.textContent = "An error occurred while fetching the dossiers.";
+                    });
+            };
+        
+            const fetchDossierDetails = (idClient) => {
+                fetch(`/get_dossier_details/${idClient}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Details received:', data);  // Debug statement
+                        const modal = document.getElementById('detail-modal');
+                        const modalBody = document.getElementById('modal-body');
+                        modalBody.innerHTML = `
+                            <strong>Missing Elements:</strong> ${data.missing_elements.join(', ')}<br>
+                            <strong>Description:</strong> ${data.descriptif}
+                        `;
+                        modal.style.display = 'block';
+                    })
+                    .catch(error => {
+                        console.error('Error fetching dossier details:', error);
+                    });
+            };
+        
+            dossierTableBody.addEventListener('click', (event) => {
+                if (event.target.closest('.dossier-row.nonconforme')) {
+                    const idClient = event.target.closest('.dossier-row').dataset.idClient;
+                    fetchDossierDetails(idClient);
+                }
+            });
+        
+            const modal = document.getElementById('detail-modal');
+            const span = document.getElementsByClassName('close')[0];
+        
+            span.onclick = () => {
+                modal.style.display = 'none';
+            };
+        
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            };
+        
+            // Initial fetch to load all dossiers
+            fetchDossiers();
+        
+            searchButton.addEventListener('click', () => {
+                const num_compte = searchInput.value;
+                const filter_type = filterSelect.value;
+                fetchDossiers(num_compte, filter_type);
+            });
+        
+            filterSelect.addEventListener('change', () => {
+                const num_compte = searchInput.value;
+                const filter_type = filterSelect.value;
+                fetchDossiers(num_compte, filter_type);
+            });
         });
+        
+        
     </script>
 </body>
 </html>
-
-
-
-        return render_template('directeur.html', results=results)
-    
-    except Exception as e:
-        return str(e)
