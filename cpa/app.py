@@ -434,100 +434,385 @@ if __name__ == '__main__':
 
 
 
+/***********************************************************************/
+LES UPDATES RAM HNAAAAAAA !!!!!!!!!!!!!!!!!!!!
+@app.route('/login', methods=['POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
 
-# ani nkhdam b flaskext   chofi page etude hadik autre makantch tmchi tsma sagamtha 
-# @app.route('/etude', methods=['GET', 'POST'])
-# def ch_etude():
-#     if request.method == 'POST':
-#         cur = mysql.connection.cursor()
+        try:
+            conn = mysql.connect()
+            cur = conn.cursor()
+            cur.execute("SELECT folio, mdp, nom, prenom, qualite FROM utilisateur WHERE folio = %s AND mdp = %s", (username, password))
+            user = cur.fetchone()  # Fetch one row
 
-#         # Récupération de id_client et autres données du formulaire
-#         num_comp = request.form.get('num_com')
-#         cur.execute("SELECT idclient , datereception FROM dossier WHERE num_compte=%s;", (num_comp,))
-#         row = cur.fetchone()
+            if user:  # Check if user exists
+                print(f"User data fetched: {user}")  # Debug print for user data
+                qualite = user[4]  # Accessing qualite from tuple
+                session['folio'] = user[0]  # Store folio in session
+                if qualite == 'Secrétaire':
+                    return render_template('secretaire.html', user=user)  # Pass user to template
+                elif qualite == 'Charge étude':
+                    return render_template('etude.html', user=user)
+                elif qualite == 'Charge de validation':
+                    return render_template('validation.html', user=user)
+                elif qualite == 'Directeur':
+                    return render_template('directeur.html', user=user)
+                else:
+                    print(f"Unknown qualite: {qualite}")  # Debug print for unknown roles
+                    return render_template('index.html')
+            else:
+                print("User not found or incorrect password")  # Print debug message for login failure
+                return render_template('index.html')  # Render index.html or handle as needed
 
-#         if row is None:
-#             cur.close()
-#             return 'Aucun client trouvé avec l\'identifiant fourni.', 404
-        
-#         id_client = row['idclient']
-#         datereception = row['datereception']
-        
-#         # Collecte des éléments marqués comme 'nexistepas'
-#         elements = []
-#         for i in range(0, 33):  # Ajustez la plage en fonction du nombre d'éléments dans votre formulaire
-#             key_element = f'element{i}'
-#             if request.form.get(key_element) == 'nexistepas':
-#                 elements.append((id_client, i))  # Inclure id_client et le numéro d'élément
-        
-#         # Déterminer quel textarea utiliser en fonction de la sélection de l'utilisateur
-#         personne_type = request.form.get('personne')
-#         autre_texte = None
-        
-#         if personne_type == 'morale':
-#             autre_texte = request.form.get('autreTexteMorale')
-#         elif personne_type == 'physique':
-#             autre_texte = request.form.get('autreTextePhysique')
-        
-#         if autre_texte:
-#             elements.append((id_client, autre_texte))
-        
-#         try:
-#             # Insérer dans la table docs
-#             sql = "INSERT INTO docs (idclient, element) VALUES (%s, %s)"
-#             for element in elements:
-#                 cur.execute(sql, element)  # Exécuter la requête avec chaque tuple d'élément
-#                 mysql.connection.commit()
+        except Exception as e:
+            print(f"Error executing MySQL query: {e}")
+            return render_template('index.html')
+        finally:
+            cur.close()  # Close cursor
+            conn.close()  # Close connection
 
-#             # Insérer dans la table datetransmis
-#             cur.execute("""
-#                 INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, IDCLIENT, FOLIO)
-#                 VALUES (%s, %s, %s, %s, %s, %s)""",
-#                         (datereception, datetime.now().strftime('%Y-%m-%d'), request.form.get('conformity'), autre_texte, id_client, session.get('folio')))
-#             mysql.connection.commit()
-
-#             cur.close()
-#             return render_template('etude.html', num_com=num_comp, datereception=datereception)
         
-#         except Exception as e:
-#             # Gérer les exceptions (par exemple, les erreurs de base de données)
-#             print(f"Erreur lors de la soumission du formulaire d'étude : {str(e)}")
-#             return 'Une erreur est survenue lors du traitement du formulaire. Veuillez réessayer plus tard.', 500
+@app.route('/get_agences')
+def get_agences():
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+        query = "SELECT Code, intitule FROM agence;"
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        if result:
+            data = [{'code': row[0], 'intitule': row[1]} for row in result]
+            return json.dumps(data)
+        else:
+            return json.dumps([])
+    except Exception as e:
+        print(f"Error fetching agences: {e}")
+        return json.dumps([])
 
-#     # Gérer la requête GET (afficher le formulaire)
-#     return render_template('etude.html')
 
-# *******************************************************
-# @app.route('/today_dossiers')
-# def today_dossiers():
-#     try:
-#         cur = mysql.connect().cursor()
-#         cur.execute("""
-#             SELECT d.num_compte, d.nom, d.prenom, dt.daterecp, dt.dateenvoi
-#             FROM dossier d
-#             JOIN datetransmis dt ON d.idclient = dt.idclient
-#             WHERE DATE(dt.daterecp) = CURDATE() OR DATE(dt.dateenvoi) = CURDATE()
-#         """)
-#         dossiers = cur.fetchall()
-#         cur.close()
-        
-#         # Convert data to a list of dictionaries for JSON serialization
-#         dossiers_list = [{'num_compte': row[0], 'nom': row[1], 'prenom': row[2], 'date_reception': row[3], 'date_envoi': row[4]} for row in dossiers]
-        
-#         return jsonify(dossiers_list)
+@app.route('/secretaire', methods=['GET', 'POST'])
+def secretaire():
+    if request.method == 'POST':
+        # Handle form submission
+        try:
+            conn = mysql.connect()
+            cur = conn.cursor()
+
+            # Extract form data
+            id_client = request.form['id_client']
+            num_compte = request.form['num_compte']
+            nom = request.form['nom'] or None
+            prenom = request.form['prenom'] or None
+            agence_id = request.form['agence']
+            raison_sociale = request.form['raison_sociale'] or None
+            activite = request.form['activite'] or None
+            adresse = request.form['adresse']
+            numerotel = request.form['numerotel']
+            date_ouverture = request.form['date_ouverture']
+            date_cloture = request.form['date_cloture'] or None
+            cause = request.form['cause'] or None
+            num_reg_com = request.form['num_reg_com']
+            date_reg_com = request.form['date_reg_com']
+            code_agence = request.form['code_agence']
+            daterecp = request.form['date_reception']
+
+            dateenvoi = datetime.now().strftime('%Y-%m-%d')
+            etat = None
+            descriptif = None
+            folio = session.get('folio')
+
+            # Insert into dossier table
+            cur.execute("""
+                INSERT INTO dossier (id_client, raison_sociale, nom, prenom, num_compte, agence, ACTIVITE, date_ouverture, DATE_CLOTURE, adresse, NUMEROTEL, CAUSE, NUM_REG_COM, DATE_REG_COM, CODE_AGENCE)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                        (id_client, raison_sociale, nom, prenom, num_compte, agence_id, activite, date_ouverture, date_cloture, adresse, numerotel, cause, num_reg_com, date_reg_com, code_agence))
+
+            # Insert into datetransmis table
+            cur.execute("""
+                INSERT INTO datetransmis (DATERECP, DATEENVOI, ETAT, DESCRIPTIF, FOLIO, id_client)
+                VALUES (%s, %s, %s, %s, %s, %s)""",
+                        (daterecp, dateenvoi, etat, descriptif, folio, id_client))
+
+            conn.commit()
+            cur.close()
+
+            return redirect(url_for('secretaire'))
+
+        except Exception as e:
+            print(f"Error submitting dossier form: {e}")
+            return 'An error occurred while submitting the dossier form.'
+
+    else:
+        # Fetch the user's details from the database
+        folio = session.get('folio')
+        try:
+            conn = mysql.connect()
+            cur = conn.cursor()
+            cur.execute("SELECT nom, prenom, mdp FROM utilisateur WHERE folio = %s AND qualite = 'Secrétaire'", (folio,))
+            user = cur.fetchone()
+            cur.close()
+        except Exception as e:
+            print(f"Error fetching user details: {e}")
+            user = None
+
+        return render_template('secretaire.html', user=user)
+
+@app.route('/enversag')
+def envversagence(): 
+    return render_template('envoiversag.html')
+   
+@app.route('/envoiversag', methods=['GET', 'POST'])
+def envoiversagence():
+    folio = session.get('folio')
+    user_info = None
+    try:
+        conn = mysql.connect()
+        cur = conn.cursor()
+        cur.execute("SELECT nom, prenom, mdp FROM utilisateur WHERE folio = %s AND qualite = 'Secrétaire'", (folio,))
+        user_info = cur.fetchone()
+        cur.close()
+    except Exception as e:
+        print(f"Error fetching user details: {e}")
+    finally:
+        conn.close()  # Always close the connection
     
-#     except Exception as e:
-#         print(f"Error fetching today's dossiers: {e}")
-#         return jsonify([])
-#         #NESRIIIINIE ANA HNA NI NKHDAM B flaskext DONC NTI VERIFIER 9BL#
-# ****************************************************************************
-# @app.route('/validation')
-# def validation():
-#     return render_template('validation.html')
+    print(user_info)  # Check what data is retrieved from the database
+    
+    return render_template('envoiversag.html', user_info=user_info)
 
-# @app.route('/directeur')
-# def directeur():
-#     return render_template('directeur.html')
+@app.route('/to_agence', methods=['POST'])
+def to_agence():
+    date_envoi = request.form['date_envoi']
+    num_compte = request.form['num_compte']
+    agence = request.form['agence']
+    
+    conn = mysql.connect()
+    cursor = conn.cursor()
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+    # Query to get id_client based on num_compte
+    query = "SELECT id_client FROM dossier WHERE num_compte = %s"
+    cursor.execute(query, (num_compte,))
+    result = cursor.fetchone()
+
+    if result:
+        id_client = result[0]
+        folio = session.get('folio')  # Ensure folio is retrieved from session
+
+        if folio is None:
+            cursor.close()
+            conn.close()
+            return "Folio is missing from session", 400
+
+        # Insert into datetransmis
+        insert_query = "INSERT INTO datetransmis (dateenvoi, id_client, nom_agence, folio) VALUES (%s, %s, %s, %s)"
+        cursor.execute(insert_query, (date_envoi, id_client, agence, folio))
+        conn.commit()
+
+        # Fetch user info again to keep displaying it
+        user_info = None
+        try:
+            cur = conn.cursor()
+            cur.execute("SELECT nom, prenom, mdp FROM utilisateur WHERE folio = %s AND qualite = 'Secrétaire'", (folio,))
+            user_info = cur.fetchone()
+            cur.close()
+        except Exception as e:
+            print(f"Error fetching user details: {e}")
+
+        cursor.close()
+        conn.close()
+
+        return render_template('envoiversag.html', user_info=user_info)  # Render the template with user_info
+    else:
+        cursor.close()
+        conn.close()
+        return "Num compte not found", 404  # Return an error if num_compte not found
+    @app.route('/get_dossier_details', methods=['POST'])
+def get_dossier_details():
+    try:
+        num_compte = request.form['num_compte']
+        
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        # Query to get dossier details with conditionally displaying elements
+        dossier_query = """
+        SELECT 
+            d.num_compte, 
+            dt.daterecp, 
+            dt.dateenvoi, 
+            dt.etat, 
+            dt.descriptif, 
+            dt.folio, 
+            d.agence, 
+            d.nom, 
+            d.prenom, 
+            CASE 
+                WHEN dt.etat = 'conforme' THEN NULL
+                ELSE doc.element
+            END AS element_display
+        FROM dossier d
+        LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
+        LEFT JOIN docs doc ON d.id_client = doc.id_client
+        WHERE d.num_compte = %s
+          AND dt.folio = (SELECT folio FROM utilisateur WHERE qualite = 'Charge Étude')
+        ORDER BY dt.daterecp ASC
+        """
+        cursor.execute(dossier_query, (num_compte,))
+        dossiers = cursor.fetchall()
+        cursor.close()
+
+        if dossiers:
+            dossier_details = [{
+                'num_compte': dossier[0],
+                'daterecp': dossier[1],
+                'dateenvoi': dossier[2],
+                'etat': dossier[3],
+                'descriptif': dossier[4],
+                'folio': dossier[5],
+                'agence': dossier[6],
+                'nom': dossier[7],
+                'prenom': dossier[8],
+                'element_display': map_element_id_to_text(dossier[9])
+            } for dossier in dossiers]
+
+            return render_template('validation.html', dossiers=dossier_details)
+        
+        else:
+            return render_template('validation.html', error='Numéro de compte non trouvé ou pas de dossier pour Charge Étude.')
+
+    except Exception as e:
+        print(f"Error retrieving dossier details: {e}")
+        return render_template('validation.html', error='Une erreur est survenue lors de la récupération des détails du dossier.')
+
+    finally:
+        conn.close()
+
+    return redirect(url_for('validation'))       
+
+@app.route('/directeur', methods=['GET'])
+def directeur():
+    conn = mysql.connect()
+    cursor = conn.cursor()
+
+    query_base = """
+        SELECT d.id_client, d.num_compte, dt.daterecp, dt.dateenvoi, dt.etat, dt.folio
+        FROM dossier d
+        LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
+    """
+    cursor.execute(query_base)
+    dossiers = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if dossiers:
+        dossier_details = [{
+            'id_client': dossier[0],
+            'num_compte': dossier[1],
+            'daterecp': dossier[2],
+            'dateenvoi': dossier[3],
+            'etat': dossier[4],
+            'folio': dossier[5]
+        } for dossier in dossiers]
+        return jsonify(dossier_details)
+    else:
+        return jsonify([]), 404
+
+@app.route('/directeur_filtrage', methods=['GET'])
+def directeur_filtrage():
+    num_compte = request.args.get('num_compte')
+    filter_type = request.args.get('filter_type')
+    conn = mysql.connect()
+    cursor = conn.cursor()
+    
+    query_base = """
+        SELECT d.id_client, d.num_compte, dt.daterecp, dt.dateenvoi, dt.etat, dt.folio
+        FROM dossier d
+        LEFT JOIN datetransmis dt ON d.id_client = dt.id_client
+    """
+    query_filters = []
+    params = []
+
+    if num_compte:
+        query_filters.append("d.num_compte = %s")
+        params.append(num_compte)
+
+    if filter_type == 'recu_non_traite':
+        query_filters.append("dt.daterecp IS NOT NULL AND (dt.etat IS NULL OR dt.etat = '')")
+    elif filter_type == 'traite_envoye':
+        query_filters.append("dt.daterecp IS NULL AND dt.etat IS NULL")
+    elif filter_type == 'traite_non_envoye':
+         query_filters.append("""
+            dt.etat IN ('Conforme', 'nonconforme', 'validé') 
+            AND dt.folio IN (
+                SELECT folio FROM utilisateur 
+                WHERE qualite IN ('charge étude', 'Charge de validation')
+            )
+        """)
+
+    if query_filters:
+        query = f"{query_base} WHERE {' AND '.join(query_filters)}"
+    else:
+        query = query_base
+
+    cursor.execute(query, params)
+    dossiers = cursor.fetchall()
+    cursor.close()
+    conn.close()
+
+    if dossiers:
+        dossier_details = [{
+            'id_client': dossier[0],
+            'num_compte': dossier[1],
+            'daterecp': dossier[2],
+            'dateenvoi': dossier[3],
+            'etat': dossier[4],
+            'folio': dossier[5]
+        } for dossier in dossiers]
+        return jsonify(dossier_details)
+    else:
+        return jsonify([]), 404
+
+@app.route('/get_dossier_details/<id_client>', methods=['GET'])
+def get_dossier_details_by_id(id_client):
+    try:
+        conn = mysql.connect()
+        cursor = conn.cursor()
+
+        # Query to get missing elements and descriptif based on id_client
+        query = """
+        SELECT DISTINCT doc.element, COALESCE(dt.descriptif, 'No description available') as descriptif
+        FROM docs doc
+        LEFT JOIN datetransmis dt ON doc.id_client = dt.id_client
+        WHERE doc.id_client = %s AND dt.etat = 'nonconforme'
+        """
+        cursor.execute(query, (id_client,))
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        print(f"Result from database: {result}")  # Debug statement
+
+        if result:
+            missing_elements = list(set([map_element_id_to_text(row[0]) for row in result]))
+            descriptif = next((row[1] for row in result if row[1] is not None), 'No description available')
+            return jsonify({'missing_elements': missing_elements, 'descriptif': descriptif})
+        else:
+            return jsonify({'missing_elements': [], 'descriptif': 'No details available'}), 404
+
+    except Exception as e:
+        print(f"Error retrieving dossier details: {e}")
+        return jsonify({'error': 'An error occurred while retrieving dossier details'}), 500
+
+@app.route('/directeur_page', methods=['GET'])
+def directeur_page():
+    return render_template('directeur.html')
+ 
+
+if __name__ == '__main__':
+    app.run(debug=True)
+ 
